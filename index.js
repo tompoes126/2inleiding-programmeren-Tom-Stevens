@@ -8,15 +8,17 @@ canvas.height = 500;
 const knSound = new Howl({ src: ["./sounds/drop_sound.wav"] });
 const hitSound = new Howl({ src: ["./sounds/hit_sound.wav"] });
 const backgroundMusic = new Howl({ src: ["./sounds/background_sound2.mp3"], loop: true });
-backgroundMusic.play();
 
 // Afbeeldingen laden
 const backgroundImg = new Image();
 backgroundImg.src = "./images/background_game.jpg";
+
 const player1Img = new Image();
 player1Img.src = "./images/player1.png";
+
 const player2Img = new Image();
 player2Img.src = "./images/player2.png";
+
 const nuggetImg = new Image();
 nuggetImg.src = "./images/kipnuggetimage.png";
 
@@ -52,15 +54,13 @@ class ChickenNugget {
 }
 
 // Spelers en objecten
-let player1 = new Player(300, 103.5, player1Img);
-let player2 = new Player(300, 455, player2Img);
+let player1, player2;
 let nuggets = [];
 let score = 0;
 let nuggetCounter = 0;
 
 // Toetsenbord input
 let keys = {};
-
 window.addEventListener("keydown", (e) => keys[e.key] = true);
 window.addEventListener("keyup", (e) => keys[e.key] = false);
 
@@ -111,7 +111,6 @@ function gameLoop() {
     nuggets.forEach((nugget, index) => {
         let nuggetRect = { x: nugget.x, y: nugget.y, width: nugget.width, height: nugget.height };
         let player2Rect = { x: player2.x, y: player2.y, width: player2.width, height: player2.height };
-
         if (checkCollision(nuggetRect, player2Rect)) {
             nuggets.splice(index, 1);
             score++;
@@ -123,7 +122,6 @@ function gameLoop() {
     if (score >= 3) {
         showWinMessage("PLAYER 1 WINS!");
     }
-
     if (nuggetCounter > 10) {
         showWinMessage("PLAYER 2 WINS!");
     }
@@ -141,9 +139,9 @@ function gameLoop() {
 // Functie om botsing te checken
 function checkCollision(rect1, rect2) {
     return rect1.x < rect2.x + rect2.width &&
-           rect1.x + rect1.width > rect2.x &&
-           rect1.y < rect2.y + rect2.height &&
-           rect1.y + rect1.height > rect2.y;
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y;
 }
 
 // Functie om winnaar te laten zien
@@ -155,8 +153,25 @@ function showWinMessage(message) {
         score = 0;
         nuggetCounter = 0;
         nuggets = [];
-    }, 3000);
+    }, 2000);
 }
 
-// Start de game loop
-gameLoop();
+// Wacht tot alle afbeeldingen zijn geladen voordat de game start
+let imagesLoaded = 0;
+const totalImages = 4; // Aantal afbeeldingen
+
+function imageLoaded() {
+    imagesLoaded++;
+    if (imagesLoaded === totalImages) {
+        // Alle afbeeldingen zijn geladen, initialiseer de spelers en start de game loop
+        player1 = new Player(300, 103.5, player1Img);
+        player2 = new Player(300, 455, player2Img);
+        backgroundMusic.play();
+        gameLoop();
+    }
+}
+
+backgroundImg.onload = imageLoaded;
+player1Img.onload = imageLoaded;
+player2Img.onload = imageLoaded;
+nuggetImg.onload = imageLoaded;
